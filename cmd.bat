@@ -1,0 +1,1 @@
+"D:\Program Files (x86)\Steam\steamapps\common\Virtual Desktop\Virtual Desktop.exe" "F:\Evaluation_VR-onebar-vive-chn-test1.2\video\11.avi" & exit
