@@ -536,49 +536,29 @@ end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [handles]=RenderVideo(handles)
-videofile=handles.SubData.TestFiles{handles.SubData.Index};
-if(0==exist(videofile,'file'))
-     errordlg(['找不到文件' videofile]);
-     return;
-end
-videotemp=VideoReader(videofile);
-duration=get(videotemp,'Duration');
-framerate=get(videotemp,'FrameRate');
-clear videotemp;
-[path,subname,~]=fileparts(handles.SubData.OutputFilename);
-[~,filename,~]=fileparts(videofile);
-
-playerpath=[handles.Player.Path handles.Player.Name];
-
-cmd1=['"' playerpath '" "' videofile '" & exit'];
-fid = fopen('cmd.bat','w');
-fprintf(fid,'%s',cmd1);
-fclose(fid);
-
-cmd2=[which('VRTracker.exe') ' ' path ' ' subname ' ' filename ' ' num2str(duration) ' ' num2str(framerate)];
-if(strcmp(get(handles.Phase,'String'),'Testing'))
-    dos('cmd.bat &');
-    dos(cmd2);
-else
-    dos('cmd.bat &');
-end
 % videofile=handles.SubData.TestFiles{handles.SubData.Index};
 % videotemp=VideoReader(videofile);
 % duration=get(videotemp,'Duration');
+% framerate=get(videotemp,'FrameRate');
 % clear videotemp;
 % [path,subname,~]=fileparts(handles.SubData.OutputFilename);
 % [~,filename,~]=fileparts(videofile);
 % 
 % playerpath=[handles.Player.Path handles.Player.Name];
 % 
-% cmd=['"' playerpath '" "' videofile '"'];
+% cmd1=['"' playerpath '" "' videofile '" & exit'];
+% cmdwait=['"' playerpath '" "' which('wait3.mp4') '"'];
 % fid = fopen('cmd.bat','w');
-% fprintf(fid,'%s',cmd);
+% fprintf(fid,'%s',cmd1);
 % fclose(fid);
 % 
-% dos('cmd.bat');
-% dos([which('test.exe') ' ' path ' ' subname ' ' filename ' ' num2str(duration)]);
-
+% cmd2=[which('VRTracker.exe') ' -p ' path ' -s ' subname ...
+%     ' -f ' filename ' -d ' num2str(duration) ' -r ' num2str(framerate) ...
+%     ' -h 1078 -w 1'];
+% 
+% dos('cmd.bat &');
+% dos(cmd2);
+% dos(cmdwait);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [handles]=NoSave(handles)
