@@ -234,6 +234,15 @@ set(handles.CurrCount,'String',num2str(handles.SubData.Count));
 
 guidata(handles.SSCQS,handles);
 
+function Emergency_Callback(hObject, eventdata, handles)
+% hObject    handle to Next (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Render next image
+[handles]=RenderVideo(handles);
+
+guidata(handles.SSCQS,handles);
 
 % --- Executes on button press in Rate.
 function Rate_Callback(hObject, eventdata, handles)
@@ -241,6 +250,26 @@ function Rate_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.Rate,'Enable','off');
+
+%Check
+if sum(ismember(handles.SubData.IdxQP42,handles.SubData.Index))~=0 %QP42
+    
+    temp_ref=handles.SubData.AllScores(handles.SubData.RefIdx(handles.SubData.Index));
+    if temp_ref~=0
+        if temp_ref<=handles.SubData.metric
+            warndlg('请认真打分！否则数据作废！');
+            return
+        end
+    end
+elseif sum(ismember(handles.SubData.RefIdx,handles.SubData.Index))~=0 %Ref
+    Ref_QP42=handles.SubData.RefIdx(handles.SubData.IdxQP42); 
+    Icorr_QP42=(Ref_QP42==handles.SubData.Index);
+    IQP42=handles.SubData.IdxQP42(Icorr_QP42);
+    if handles.SubData.metric<=max(handles.SubData.AllScores(IQP42))
+        warndlg('请认真打分！否则数据作废！');
+            return
+    end
+end
 
 %Save the metric
 handles.SubData.AllScores(handles.SubData.Index)=handles.SubData.metric;
@@ -391,6 +420,7 @@ function [Args]=ParseInputs(varargin)
     Args.SelSubTestMethod=[];
     
     Args.Player=[];
+    Args.RefIdx=[];
 
     k=1;
     
@@ -400,6 +430,9 @@ function [Args]=ParseInputs(varargin)
         
         if(isfield(arg, 'Player'))
             Args.Player=arg.Player;
+        end
+        if(isfield(arg, 'RefIdx'))
+            Args.RefIdx=arg.RefIdx;
         end
         if(isfield(arg, 'RefFiles'))
             Args.RefFiles=arg.RefFiles;
@@ -467,6 +500,7 @@ function [Args]=ParseInputs(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [handles]=InitializeSubData(handles,Args)
 handles.Player=Args.Player;
+handles.SubData.RefIdx=Args.RefIdx;
 
 handles.SubData.NumOfTestFiles=length(Args.TestFiles);
 
@@ -483,6 +517,15 @@ handles.SubData.TestFiles=Args.TestFiles;
 handles.SubData.TestFormat=Args.TestFormat;    
 handles.SubData.TestImageWidth=Args.TestImageWidth;  
 handles.SubData.TestImageHeight=Args.TestImageHeight;  
+
+%find index of qp42
+IdxQP42=[];
+for i_qp=1:size(handles.SubData.TestFiles,2)
+    if ~isempty(strfind(handles.SubData.TestFiles{i_qp},'qp42'))
+       IdxQP42=[IdxQP42,i_qp]; 
+    end
+end
+handles.SubData.IdxQP42=IdxQP42;
 
 handles.SubData.IsImageShown=zeros(handles.SubData.NumOfTestFiles,1);
 

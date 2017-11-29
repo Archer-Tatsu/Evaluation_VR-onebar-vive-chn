@@ -179,6 +179,9 @@ SubTestParam.SubjectNum=handles.ToolOptions.SubjectNum;
 SubTestParam.SelSubTestMethod=handles.SubTestData.SelSubTestMethod(1);
 SubTestParam.Player=handles.Player;
 
+%Send RefIndex for checking
+SubTestParam.RefIdx=RefIdx;
+
 %Perform subjective testing
 bProceed=0;
 try
