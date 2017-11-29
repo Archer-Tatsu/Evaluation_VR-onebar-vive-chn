@@ -258,6 +258,8 @@ if sum(ismember(handles.SubData.IdxQP42,handles.SubData.Index))~=0 %QP42
     if temp_ref~=0
         if temp_ref<=handles.SubData.metric
             warndlg('请认真打分！否则数据作废！');
+            handles.Fault=handles.Fault+1;
+            guidata(handles.SSCQS,handles);
             return
         end
     end
@@ -267,7 +269,9 @@ elseif sum(ismember(handles.SubData.RefIdx,handles.SubData.Index))~=0 %Ref
     IQP42=handles.SubData.IdxQP42(Icorr_QP42);
     if handles.SubData.metric<=max(handles.SubData.AllScores(IQP42))
         warndlg('请认真打分！否则数据作废！');
-            return
+        handles.Fault=handles.Fault+1;
+        guidata(handles.SSCQS,handles);
+        return
     end
 end
 
@@ -279,7 +283,16 @@ if(handles.SubData.Count==handles.SubData.NumOfTestFiles)
     %Save all ratings if testing phase
     
     [handles]=handles.SubData.SaveFn(handles);
-    msgbox('测试完成，谢谢参与.','测试完成','modal');
+    
+    %Check if too many faults
+    if(handles.Fault>=3)
+        fid=fopen('check.txt','a','n','UTF-8');
+        fprintf(fid,strrep(handles.SubData.OutputFilename,'\','\\'));
+        fclose(fid);
+        warndlg('打分出错过多，请联系管理员验证！');
+    else
+        msgbox('测试完成，谢谢参与.','测试完成','modal');
+    end
     handles.output = 1;
     guidata(handles.SSCQS,handles);
 
@@ -501,6 +514,7 @@ function [Args]=ParseInputs(varargin)
 function [handles]=InitializeSubData(handles,Args)
 handles.Player=Args.Player;
 handles.SubData.RefIdx=Args.RefIdx;
+handles.Fault=0;
 
 handles.SubData.NumOfTestFiles=length(Args.TestFiles);
 
